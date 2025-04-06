@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAV E-Stop Interface</title>
+    <style>
+        .big-button {
+            background-color: grey;
+            color: black;
+            font-size: 30px;
+            font-weight: bolder;
+            padding: 50px 100px;
+            border: 5px solid black;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+        }
+
+        .red-button {
+            background-color: red;
+        }
+
+        .red-button:hover {
+            background-color: darkred;
+        }
+
+        .active {
+            color: red;
+        }
+
+        .inactive {
+            color: green;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>E-Stop Interface</h1>
+
+    <p>E-Stop: <strong id="e-stop-status" class="active">ACTIVE</strong></p>
+    <p>You are <strong class="active" id="e-stop-triggered">TRIGGERING</strong> the E-Stop</p>
+    <button class="big-button red-button" id="e-stop-button">EMERGENCY STOP</button>
+    <hr/>
+
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+    <script type="text/javascript" type="text/javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const socket = io()
+			const eStopButton = document.getElementById("e-stop-button");
+			const eStopStrong = document.getElementById("e-stop-status");
+			const eTriggerStrong = document.getElementById("e-stop-triggered");
+
+			let triggerEStop = true;
+			socket.emit("set_estop");
+
+			socket.on("e_stop_state", msg => {
+				if (msg.state) {
+					eStopStrong.textContent = "ACTIVE";
+					eStopStrong.classList.add("active");
+					eStopStrong.classList.remove("inactive");
+				} else {
+					eStopStrong.classList.remove("active");
+					eStopStrong.classList.add("inactive");
+					eStopStrong.textContent = "INACTIVE";
+				}
+			})
+
+			eStopButton.onclick = () => {
+				if (triggerEStop) {
+					socket.emit("release_estop");
+					eTriggerStrong.textContent = "NOT TRIGGERING";
+					eTriggerStrong.classList.add("inactive");
+					eTriggerStrong.classList.remove("active");
+					triggerEStop = false;
+				} else {
+					socket.emit("set_estop");
+					eTriggerStrong.textContent = "TRIGGERING";
+					eTriggerStrong.classList.add("active");
+					eTriggerStrong.classList.remove("inactive");
+					triggerEStop = true;
+				}
+			}
+        })
+    </script>
+</body>
+</html>
