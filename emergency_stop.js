@@ -25,7 +25,7 @@ let triggerEStop = true;
 
 const eStopTopic = new ROSLIB.Topic({
 	ros,
-	name: "/trigger_estop",
+	name: "/e_stop",
 	"messageType": "std_msgs/Bool"
 });
 
